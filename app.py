@@ -17,7 +17,6 @@ def run_query(query):
     rows = rows.fetchall()
     return rows
 
-#sheet_url = st.secrets["public_gsheets_url"]
 sheet_url = st.secrets["source1_url"]
 rows = run_query(f'SELECT * FROM "{sheet_url}"')
 df = pd.DataFrame(data=rows, columns=['Date', 'num1', 'num2', 'num3', 'num4', 'num5', 'num6', 'bonus'])
@@ -33,10 +32,8 @@ df[['num1', 'num2', 'num3', 'num4', 'num5', 'num6', 'bonus']] = \
 
 # --- Get current results from web -------------
 @st.cache(ttl=600)
-def get_current_results():
-    weblink = st.secrets["source2_url"]
-
-    url = weblink
+def get_current_results(thelink):
+    url = thelink
     r = requests.get(url)
     r.encoding = 'utf-8'
     if r.status_code == requests.codes.ok:
@@ -69,8 +66,8 @@ def get_current_results():
     dd.iloc[:,1:8] = dd.iloc[:,1:8].astype('int8')
     return dd
 
-
-dd = get_current_results()
+weblink = st.secrets["source2_url"]
+dd = get_current_results(weblink)
 
 
 

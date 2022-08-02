@@ -6,8 +6,7 @@ import requests
 from bs4 import BeautifulSoup
 
 
-
-# Create a connection object.
+# Create a connection object
 conn = connect()
 
 # --- Read historical data from google sheet --------
@@ -27,10 +26,8 @@ df.Date = pd.to_datetime(df.Date)
 df[['num1', 'num2', 'num3', 'num4', 'num5', 'num6', 'bonus']] = \
    df[['num1', 'num2', 'num3', 'num4', 'num5', 'num6', 'bonus']].astype('int8')
 
-# display a sample
-##st.table(df.head(10))
 
-# --- Get current results from web -------------
+# --- Get current data from web -------------
 @st.cache(ttl=600)
 def get_current_results(thelink):
     url = thelink
@@ -38,8 +35,6 @@ def get_current_results(thelink):
     r.encoding = 'utf-8'
     if r.status_code == requests.codes.ok:
         data = BeautifulSoup(r.text, 'html.parser')
-
-
         theArea = data.select('div.col.s_8_12 > *')
         rows = []
         for theRow in theArea:    
@@ -47,7 +42,6 @@ def get_current_results(thelink):
             arr = [theRow.contents[0].contents[0]]
 
             for sect in theRow:
-                
                 wb = sect.select('span.white') # the 6 numbers
                 for w in wb:
                     #print(w.text)
@@ -60,7 +54,7 @@ def get_current_results(thelink):
 
             rows.append(arr)
 
-    #print(rows[0])
+    # convert data to dataframe
     dd = pd.DataFrame(data=rows, columns=['Date','num1','num2','num3', 'num4', 'num5', 'num6', 'bonus'] )
     dd.Date = pd.to_datetime(dd.Date, infer_datetime_format=True)
     dd.iloc[:,1:8] = dd.iloc[:,1:8].astype('int8')
@@ -76,10 +70,10 @@ dd = get_current_results(weblink)
 dd = dd[(dd.Date > df.Date.max())]
 df = pd.concat([dd.sort_values(by='Date', ascending=False), df])
 df['NumList'] = df.iloc[:,1:7].values.tolist()
-##st.table(df.head(10))
 
 
-# ---------------------------------
+
+# --------begin streamlit interface-----------------
 # initialize state
 if 'num' not in st.session_state:
     st.session_state['num'] = 4
@@ -91,13 +85,12 @@ for x in range(0, 6):
         st.session_state[f'n{x}'] = randnums[x]
 
 
-"Inspired by the creator of Wordle, I created this tool for my wife to check her Ontario49 numbers. ;)"
+st.write("Inspired by the creator of Wordle, I created this tool for my wife to check her Ontario49 numbers. ;)")
 
 st.header('Minimum desired matches (.5 for bonus no.):')
 num = st.number_input('', 3., 6., step=0.5, \
                       format='%f', key='num')
 
-# begin interface
 st.header('Your chosen numbers:')
 cols = st.columns(6)
 num1 = cols[0].number_input('', 1, 49, key='n0')
@@ -107,29 +100,22 @@ num4 = cols[3].number_input('', 1, 49, key='n3')
 num5 = cols[4].number_input('', 1, 49, key='n4')
 num6 = cols[5].number_input('', 1, 49, key='n5')
 
-
 if st.button('Submit'):
     nums = [num1, num2, num3, num4, num5, num6]
     if len(set(nums)) < 6:
         st.warning('Cannot have repeated numbers')
     else:
-        #st.info('okay')
-        #nums.sort()
-        #st.write('Your chosen numbers:   ' + ', '.join(map(str,nums)))
-
-        # proceed to show results
-
-        # computer matches based on user's numbers
+        # compute matches based on user's numbers
         df['Matches'] = (df.NumList.iloc[:].apply(lambda x: len(set(x).intersection(set(nums))))
                  + df.bonus.iloc[:].apply(lambda x: int(x in set(nums)) * 0.5))    
         
+        # Proceed to show results
         # CSS to inject contained in a string
         hide_dataframe_row_index = """
                     <style>
                     .row_heading.level0 {display:none}
                     .blank {display:none}
                     .col_heading   {text-align: center !important}
-
                     </style>
                     """
         # Inject CSS with Markdown
@@ -138,10 +124,5 @@ if st.button('Submit'):
         fmt = "%Y-%m-%d"
         st.table(df[df.Matches >= num][['Date', 'num1', 'num2', 'num3','num4', 'num5', 'num6', 'bonus', 'Matches']] \
                  .style.format({ "Date": lambda t: t.strftime(fmt), "Matches":"{:.1f}"}))
-        
 else:
     st.write('')
-
-
-
-

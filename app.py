@@ -88,7 +88,7 @@ for x in range(0, 6):
 
 st.write("Inspired by the creator of Wordle, I created this tool for my wife to check her Ontario49 numbers. ;)")
 
-num = st.number_input('Enter minimumm desired matches [.5 for bonus number]:'', 3., 6., step=0.5, \
+num = st.number_input('Enter minimumm desired matches [.5 for bonus number]:', 3., 6., step=0.5, \
                       format='%f', key='num')
 
 st.write('Enter your chosen numbers:')

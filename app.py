@@ -88,11 +88,10 @@ for x in range(0, 6):
 
 st.write("Inspired by the creator of Wordle, I created this tool for my wife to check her Ontario49 numbers. ;)")
 
-st.write('Minimum desired matches [.5 for bonus number]:')
-num = st.number_input('', 3., 6., step=0.5, \
+num = st.number_input('Enter minimumm desired matches [.5 for bonus number]:'', 3., 6., step=0.5, \
                       format='%f', key='num')
 
-st.write('Your chosen numbers:')
+st.write('Enter your chosen numbers:')
 cols = st.columns(6)
 num1 = cols[0].number_input('', 1, 49, key='n0')
 num2 = cols[1].number_input('', 1, 49, key='n1')

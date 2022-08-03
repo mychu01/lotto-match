@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 
 
 # --- Read historical data from google sheet --------
-@st.cache(ttl=600)
+@st.cache(ttl=600, allow_output_mutation=True)
 def run_query(query):
     # Create a connection object
     conn = connect()
